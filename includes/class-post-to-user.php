@@ -114,7 +114,7 @@ class Post_User {
 					'twitter'     => $social['twitter'], // need to loop through array
 					'linkedin'    => $social['linkedin'], // need to loop through array
 					'company'     => get_field( 'company' ),
-					'job_title'   => get_field( 'job_title' ),
+					'job_title'   => get_field( 'position' ),
 					'role'        => $_POST['role'],
 				);
 
