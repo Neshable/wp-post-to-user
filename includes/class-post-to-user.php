@@ -101,25 +101,34 @@ class Post_User {
 				// Separate first name from last name
 				$title = explode( ' ', $title );
 
+				$last_name = $title[1];
+
+				// Add suport for person with 3 names
+				if ( $title[2] ) {
+					$last_name = $title[1] . " " . $title[2];
+				}
+
 				// In order to get the slug
 				global $post;
 
 				$social = get_field( 'social_networks' );
 				// Gather user data
 				$user_data = array(
-					'username'    => $post->post_name,
-					'first_name'  => $title[0],
-					'last_name'   => $title[1],
-					'description' => $post->post_content,
-					'twitter'     => $social['twitter'], // need to loop through array
-					'linkedin'    => $social['linkedin'], // need to loop through array
-					'company'     => get_field( 'company' ),
-					'job_title'   => get_field( 'position' ),
-					'role'        => $_POST['role'],
+					'username'    		=> $post->post_name,
+					'first_name'  		=> $title[0],
+					'last_name'   		=> $last_name,
+					'description' 		=> $post->post_content,
+					'twitter'     		=> $social['twitter'], // need to loop through array
+					'linkedin'    		=> $social['linkedin'], // need to loop through array
+					'company'    		=> get_field( 'company' ),
+					'profile_photo' 	=> get_the_post_thumbnail_url( $post->ID , 'full' ), // get full featured image
+					'job_title'   		=> get_field( 'position' ),
+					'role'       		=> $_POST['role'],
 				);
-
+				
 				// Create the user
 				$this->post_user_add_user( $user_data );
+
 			}
 			// Restore original Post Data
 			wp_reset_postdata();
@@ -143,7 +152,6 @@ class Post_User {
 			'first_name'  => $user_data['first_name'],
 			'last_name'   => $user_data['last_name'],
 			'twitter'     => $user_data['twitter'],
-			'linkedin'    => $user_data['linkedin'],
 			'description' => $user_data['description'],
 			'user_pass'   => md5( rand( 1000000, 9999999 ) ), // create hash of randomized number as password
 			'role'        => $user_data['role'],
@@ -153,6 +161,7 @@ class Post_User {
 		$user_meta = array(
 			'company'   => $user_data['company'],
 			'job_title' => $user_data['job_title'],
+			'linkedin'  => $user_data['linkedin']
 		);
 
 		// try to insert the user
@@ -167,7 +176,10 @@ class Post_User {
 				}
 			}
 
-			echo '<p>' . __( 'User created', 'post-to-user' ) . ': ' .$user_data['username'] . '</p>';
+			// Add profile image via Ultimate member 2.0.14
+			UM()->files()->new_user_upload( $user_id, $user_data['profile_photo'], 'profile_photo' );
+
+			echo '<p>' . __( 'User created', 'post-to-user' ) . ': ' .$user_data['username'] . '</p><br />';
 		} else {
 			// show error message
 			$errors = implode( ', ', $user_id->get_error_messages() );
